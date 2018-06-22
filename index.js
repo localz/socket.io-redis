@@ -435,7 +435,7 @@ function adapter(uri, opts) {
     var self = this;
     var requestid = uid2(6);
 
-    pub.send_command('pubsub', ['numsub', self.requestChannel], function(err, numsub){
+    var callback = function(err, numsub){
       if (err) {
         self.emit('error', err);
         if (fn) fn(err);
@@ -468,8 +468,27 @@ function adapter(uri, opts) {
       };
 
       pub.publish(self.requestChannel, request);
-    });
-  };
+    }
+    if (pub.connectionPool) {
+      // Sum subscribers from cluster nodes and execute the command against all of them.
+      var nodes = Object.values(pub.connectionPool.nodes.all);
+      var commands = nodes.map(node => new Command('pubsub', ['numsub', self.requestChannel], {
+        replyEncoding: 'utf8'
+      }));
+      var commandPromises = commands.map(command => command.promise);
+      nodes.forEach((node, i) => node.sendCommand(commands[i]));
+      Promise.all(commandPromises).then((results) => {
+        const numsub = results.reduce((acc, result) => {
+          acc.channel = result[0];
+          acc.clients = acc.clients + result[1];
+          return acc;
+        }, { channel: '', clients: 0 });
+        callback(null, [numsub.channel, numsub.clients])
+      })
+    } else {
+      pub.send_command('pubsub', ['numsub', self.requestChannel], callback);
+    }
+  }
 
   /**
    * Gets the list of rooms a given client has joined.
