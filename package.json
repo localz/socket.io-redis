@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:socketio/socket.io-redis.git"
+    "url": "git@github.com:localz/socket.io-redis.git"
   },
   "files": [
     "index.js"
