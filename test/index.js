@@ -5,7 +5,7 @@ var ioc = require('socket.io-client');
 var expect = require('expect.js');
 var adapter = require('../');
 
-var ioredis = require('ioredis').createClient;
+var Redis = require('ioredis');
 
 var namespace1, namespace2, namespace3;
 var client1, client2, client3;
@@ -19,8 +19,8 @@ var socket1, socket2, socket3;
     name: 'socket.io-redis with ioredis',
     options: function () {
       return {
-        pubClient: ioredis(),
-        subClient: ioredis()
+        pubClient: new Redis(),
+        subClient: new Redis()
       }
     }
   },

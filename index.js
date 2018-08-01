@@ -8,7 +8,7 @@ var redis = require('redis').createClient;
 var msgpack = require('notepack.io');
 var Adapter = require('socket.io-adapter');
 var debug = require('debug')('socket.io-redis');
-
+var Command = require('ioredis').Command
 /**
  * Module exports.
  */
